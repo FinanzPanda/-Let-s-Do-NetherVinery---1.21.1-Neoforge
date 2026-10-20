@@ -23,6 +23,19 @@ java {
 }
 
 repositories {
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Let's Do Maven"
+                url = "https://raw.githubusercontent.com/Let-s-Do-Collection/Foundation/1.21.1/maven"
+            }
+        }
+        filter {
+            includeGroup "net.satisfy.foundation"
+        }
+    }
+
     maven {
         url = 'https://maven.blamejared.com/'
     }
@@ -32,8 +45,22 @@ repositories {
     }
 
     maven {
+        url = "https://maven.architectury.dev/"
+    }
+
+    maven {
+        name = "Sleeping Town"
+        url = "https://repo.sleeping.town/"
+    }
+
+    maven {
+        url = "https://maven.satisfy.dev/releases"
+    }
+
+    maven {
         url = 'https://api.modrinth.com/maven'
     }
+
 }
 
 neoForge {
@@ -71,6 +98,11 @@ sourceSets.main.resources {
     srcDir 'src/generated/resources'
 }
 
+configurations {
+    localRuntime
+    runtimeClasspath.extendsFrom(localRuntime)
+}
+
 dependencies {
     implementation(
             "net.satisfy.foundation:foundation-neoforge:${foundation_version}"
@@ -87,11 +119,12 @@ dependencies {
 
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     localRuntime "dev.emi:emi-neoforge:${emi_version}"
+
+    compileOnly files("libs/letsdo-vinery-neoforge-1.5.6.jar")
+    implementation files("libs/letsdo-vinery-neoforge-1.5.6.jar")
 }
 
-configurations {
-    runtimeClasspath.extendsFrom localRuntime
-}
+
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
@@ -114,33 +147,4 @@ tasks.named('processResources', ProcessResources).configure {
 
 tasks.named('jar', Jar).configure {
     archiveClassifier = 'dev'
-}
-
-modrinth {
-    token = System.getenv('MODRINTH_TOKEN')
-    projectId = 'lets-do-vinery'
-    versionNumber = mod_version
-    versionName = "${archivesBaseName}-${mod_version} [${minecraft_version}-neoforge]"
-    versionType = 'release'
-    changelog = rootProject.file('CHANGELOG.md').exists()
-            ? rootProject.file('CHANGELOG.md').text
-            : ' '
-    gameVersions = [minecraft_version]
-    loaders = ['neoforge']
-    uploadFile = tasks.named('jar')
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId = 'lets-do-nether-vinery-neoforge'
-            from components.java
-        }
-    }
-
-    repositories {
-        maven {
-            url = uri("${project.projectDir}/repo")
-        }
-    }
 }
